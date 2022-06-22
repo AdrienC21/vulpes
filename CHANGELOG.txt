@@ -1,0 +1,6 @@
+Change Log
+==========
+
+0.1.0 (21/04/2022)
+------------------
+- Version 1 of the Vulpes python package.
