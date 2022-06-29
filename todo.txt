@@ -1,10 +1,35 @@
-install_requires dans setup
+extend proba before voting
+
+
+
+add hyperparameters tuning
+
+??
+warnings.filterwarnings("ignore")
+pd.set_option("display.precision", 2)
+??
+
+add more:
+- predefined_list_models (genre tree, boosting, etc)
+- predefined_cv
+- predefined_preprocessing
+
+----
+
 pip install setuptools
 python3 setup.py sdist bdist_wheel
 pip install twine
 twine upload dist/*
 adrien.carrel pwd
 
+
+install_requires dans setup
+
+setup.cfg with requirements
+
+Get some inspiration: https://github.com/scikit-learn/scikit-learn
+
+Logo
 
 .. image:: https://img.shields.io/pypi/v/lazypredict.svg
         :target: https://pypi.python.org/pypi/lazypredict
@@ -23,3 +48,14 @@ adrien.carrel pwd
 .. image:: https://www.codefactor.io/repository/github/shankarpandala/lazypredict/badge
    :target: https://www.codefactor.io/repository/github/shankarpandala/lazypredict
    :alt: CodeFactor
+
+
+Tutorials
+
+Dans "Examples" des fonctions, mettre des vrais valeurs
+
+Liste exhaustive des metrics et des modèles
+
+Unit test
+
+Voting Classifier? Cross validation for classifier?
