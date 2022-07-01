@@ -133,3 +133,7 @@ dmypy.json
 
 # SBATCH log
 *.out
+
+# images
+logo.jpg
+social_image.png
