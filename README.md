@@ -30,7 +30,7 @@ Vulpes stands for: **V**ector (**U**n)supervised **L**earning **P**rogram **E**s
 
 Nah, I'm kidding, I just love foxes, they are cute! The most common and widespread species of fox is the red fox (Vulpes vulpes).
 
-![alt text](https://github.com/AdrienC21/vulpes/blob/master/fox.jpg?raw=true)
+![alt text](https://github.com/AdrienC21/vulpes/blob/main/fox.jpg?raw=true)
 
 ## Examples
 
