@@ -6,6 +6,7 @@
 @Author: Adrien Carrel
 """
 
+import warnings
 from typing import List, Any, Union
 
 import numpy as np
@@ -22,6 +23,7 @@ from sklearn.metrics import make_scorer, accuracy_score, \
 from sklearn.preprocessing import label_binarize
 from sklearn.utils.extmath import softmax
 
+warnings.filterwarnings("ignore")
 # define type Array_like
 Array_like = Union[List, pd.DataFrame, pd.Series, np.ndarray, Any]
 
@@ -217,13 +219,15 @@ CLASSIFIERS_TO_REMOVE = set(["CategoricalNB", "ClassifierChain",
 CLASSIFIERS = [clf for clf in CLASSIFIERS
                if clf[0] not in CLASSIFIERS_TO_REMOVE]
 # Remove voting regressions, multi-task, etc
-REGRESSIONS_TO_REMOVE = set(["CCA", "IsotonicRegression", "GammaRegressor",
-                             "MultiOutputRegressor", "MultiTaskElasticNet",
-                             "MultiTaskElasticNetCV", "MultiTaskLasso",
-                             "MultiTaskLassoCV", "PLSCanonical",
-                             "PLSRegression", "QuantileRegressor",
-                             "RadiusNeighborsRegressor", "RegressorChain",
-                             "StackingRegressor", "VotingRegressor"])
+REGRESSIONS_TO_REMOVE = set(["CCA", "IsotonicRegression",
+                             "GammaRegressor", "MultiOutputRegressor",
+                             "MultiTaskElasticNet", "MultiTaskElasticNetCV",
+                             "MultiTaskLasso", "MultiTaskLassoCV",
+                             "PoissonRegressor",
+                             "PLSCanonical", "PLSRegression",
+                             "QuantileRegressor", "RadiusNeighborsRegressor",
+                             "RegressorChain", "StackingRegressor",
+                             "VotingRegressor"])
 REGRESSIONS = [reg for reg in REGRESSIONS
                if reg[0] not in REGRESSIONS_TO_REMOVE]
 # Clustering algorithms to remove

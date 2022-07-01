@@ -10,6 +10,7 @@ common methods shared between children classes
 from ..utils.utils import CLASSIFIERS, REGRESSIONS, CLUSTERING, \
     METRIC_NAMES, METRICS_TO_REVERSE, create_model_2
 
+import warnings
 import numbers
 import operator
 from functools import reduce
@@ -29,7 +30,9 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer, make_column_selector as selector
 from sklearn.impute import SimpleImputer
 from sklearn.exceptions import NotFittedError
+from sklearn.metrics._scorer import _ProbaScorer, _PredictScorer
 
+warnings.filterwarnings("ignore")
 # define type Array_like
 Array_like = Union[List, pd.DataFrame, pd.Series, np.ndarray, Any]
 
@@ -48,7 +51,7 @@ class CoreVulpes(ABC):
         self.fitted_models_ = {}  # all the models
         self.best_model_ = None  # the best one with a voting clf/reg
 
-    def missing_data(self, X: Array_like) -> pd.Dataframe:
+    def missing_data(self, X: Array_like) -> pd.DataFrame:
         """Evaluate the absolute count and the percentage of
         missing data in a particular dataset
 
@@ -56,7 +59,7 @@ class CoreVulpes(ABC):
             X (Array_like): Dataset
 
         Returns:
-            pd.Dataframe: Absolute count and percentage of missing
+            pd.DataFrame: Absolute count and percentage of missing
             data in X
 
         Examples:
@@ -189,7 +192,7 @@ class CoreVulpes(ABC):
                     random_state=self.random_state)
                 cv = sss.split(X, groups)
         elif self.cv == "timeseries":
-            cv = TimeSeriesSplit(n_splits=5, test_size=self.test_size)
+            cv = TimeSeriesSplit(n_splits=5)
 
         # Insert predefined cross validation here!
         else:
@@ -236,6 +239,31 @@ class CoreVulpes(ABC):
                 'Please enter a valid list of models (tuple like '
                 '("XGBClassifier", xgboost.XGBClassifier)) or an '
                 'existing predefined list of models("all", ...)')
+
+    def remove_proba_metrics(
+            self, dic_scorer: Dict[str, Union[_ProbaScorer, _PredictScorer]]
+            ) -> Dict[str, Union[_ProbaScorer, _PredictScorer]]:
+        """Take a dictionnary of metrics to evaluate the goodness-of-fit of
+            classifiers as an input. Return a new version of this
+            dictionnary with only the metrics that don't need
+            probabilities to be calculated (e.g. AUROC)
+
+        Args:
+            dic_scorer (Dict[str, Union[_ProbaScorer, _PredictScorer]]):
+            dictionnary of metrics
+
+        Returns:
+            Dict[str, Union[_ProbaScorer, _PredictScorer]]: filtered
+            dictionnary of metrics
+
+        Examples:
+
+        """
+        new_dic = {}
+        for scorer_name, scorer in dic_scorer.items():
+            if isinstance(scorer, _PredictScorer):  # no predict proba
+                new_dic[scorer_name] = scorer
+        return new_dic
 
     def build_best_models(self, X: Array_like, y: Array_like, *,
                           sample_weight: Array_like = None,
@@ -298,6 +326,11 @@ class CoreVulpes(ABC):
                 f"to select the best {nb_models} ones")
 
         top = perf_counter()  # start to measure fitting time
+
+        # Convert X to dataframe
+        # (some preprocessing task, model, etc require this format)
+        if not(isinstance(X, pd.DataFrame)):
+            X = pd.DataFrame(X)
 
         # if undefined, take default values for sort_result_by and ascending
         # to select the best models
@@ -386,6 +419,16 @@ class CoreVulpes(ABC):
         # dictionary to store calculated values, model info, etc for each model
         metrics_dic = defaultdict(list)
 
+        # if it's a voting classifier with "hard" voting, as it
+        # doesn't (yet) allow the predict proba method, we need to
+        # remove some metrics when evaluating the performance
+        # of the model
+        if ((self.task == "classification") and
+           (pipe[-1].get_params()["voting"] == "hard")):
+            scoring = self.remove_proba_metrics(self.custom_scorer)
+        else:
+            scoring = self.custom_scorer
+
         if self.use_cross_validation:
             if not(hasattr(self.cv, "split") or
                     isinstance(self.cv, numbers.Integral) or
@@ -405,7 +448,7 @@ class CoreVulpes(ABC):
                     pipe, X, y, cv=cv,
                     return_estimator=True, n_jobs=-1,
                     fit_params=fit_params,
-                    scoring=self.custom_scorer)
+                    scoring=scoring)
             except ValueError as e:
                 print(e)
                 print("Cross validation failed. If groups provided, ")
@@ -419,16 +462,16 @@ class CoreVulpes(ABC):
                     pipe, X, y, cv=cv,
                     return_estimator=True, n_jobs=-1,
                     fit_params=fit_params,
-                    scoring=self.custom_scorer)
+                    scoring=scoring)
             except Exception as e:
-                print(e)
+                raise RuntimeError(str(e))
 
             # add metrics to the lists
 
             # nan mean are used, because when folding,
             # a label can be missing
             # in a particular fold, thus creating nan values
-            for metric_name in self.custom_scorer.keys():
+            for metric_name in scoring.keys():
                 print_metric_name = METRIC_NAMES.get(metric_name,
                                                      metric_name)
                 (metrics_dic[print_metric_name]
@@ -446,7 +489,7 @@ class CoreVulpes(ABC):
                         stratify=groups, random_state=self.random_state)
                 pipe.fit(X_train, y_train, **fit_params)
                 res = _validation._score(pipe, X_test, y_test,
-                                         self.custom_scorer,
+                                         scoring,
                                          error_score="raise")
             except Exception as e:
                 raise RuntimeError(f"Error when fitting: {e}")
@@ -456,7 +499,7 @@ class CoreVulpes(ABC):
             # nan mean are used, because when folding,
             # a label can be missing
             # in a particular fold, thus creating nan values
-            for metric_name in self.custom_scorer.keys():
+            for metric_name in scoring.keys():
                 print_metric_name = METRIC_NAMES.get(metric_name,
                                                      metric_name)
                 (metrics_dic[print_metric_name]
@@ -529,7 +572,7 @@ class CoreVulpes(ABC):
 
     def predict(self, X: Array_like, *,
                 dataframe_format: bool = True
-                ) -> Union[pd.dataframe, Dict[str, np.ndarray]]:
+                ) -> Union[pd.DataFrame, Dict[str, np.ndarray]]:
         """Evaluate all the fitted models on the dataset X
 
         Args:
@@ -539,7 +582,7 @@ class CoreVulpes(ABC):
             Defaults to True.
 
         Returns:
-            Union[pd.dataframe, Dict[str, np.ndarray]]: Dictionnary or
+            Union[pd.DataFrame, Dict[str, np.ndarray]]: Dictionnary or
             dataframe with the predictions
 
         Examples:

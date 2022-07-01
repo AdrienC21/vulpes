@@ -39,7 +39,7 @@ def test_classifiers_3() -> None:
     classifiers = Classifiers(preprocessing="default",
                               use_cross_validation=False)
     _ = classifiers.fit(X, y)
-    _ = classifiers.build_best_models(X, y, voting="hard")
+    _ = classifiers.build_best_models(X, y, voting="soft")
 
     _ = classifiers.get_fitted_models()
     _ = classifiers.get_best_model()

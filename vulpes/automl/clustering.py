@@ -10,6 +10,7 @@ to test many clustering algorithms
 from .corevulpes import CoreVulpes
 from ..utils.utils import CUSTOM_SCORER_CLT, METRIC_NAMES, METRICS_TO_REVERSE
 
+import warnings
 from time import perf_counter
 from typing import List, Dict, Any, Union, Tuple
 from collections import defaultdict
@@ -20,6 +21,7 @@ import pandas as pd
 from tqdm import tqdm
 from sklearn.pipeline import Pipeline
 
+warnings.filterwarnings("ignore")
 # define type Array_like
 Array_like = Union[List, pd.DataFrame, pd.Series, np.ndarray, Any]
 
@@ -70,6 +72,11 @@ class Clustering(CoreVulpes):
         Examples:
 
         """
+        # Convert X to dataframe
+        # (some preprocessing task, model, etc require this format)
+        if not(isinstance(X, pd.DataFrame)):
+            X = pd.DataFrame(X)
+
         # dictionary to store calculated values, model info, etc for each model
         metrics_dic = defaultdict(list)
 

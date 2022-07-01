@@ -2,7 +2,9 @@
 
 **Vulpes: Test many classification, regression models and clustering algorithms to see which one is most suitable for your dataset.**
 
-Vulpes is a Python package that allows you to test many models, whether you want to do classification, regression or clustering in your projects. It calculates many metrics for each model to compare them. It is highly customizable and it contains many features to save time building robust ML models.
+Vulpes 🦊 is a Python package that allows you to test many models, whether you want to do classification, regression or clustering in your projects. It calculates many metrics for each model to compare them. It is highly customizable and it contains many features to save time building robust ML models.
+
+If you like this project, please leave a star ⭐ on GitHub !
 
 Alpha version.
 

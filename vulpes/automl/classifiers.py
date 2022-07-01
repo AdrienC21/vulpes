@@ -11,6 +11,7 @@ from .corevulpes import CoreVulpes
 from ..utils.utils import CUSTOM_SCORER_CLF, METRIC_NAMES, \
     METRICS_TO_REVERSE, create_model_2
 
+import warnings
 import numbers
 from time import perf_counter
 from typing import List, Dict, Any, Union, Tuple
@@ -25,6 +26,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import cross_validate, RepeatedKFold, \
     _validation, train_test_split
 
+warnings.filterwarnings("ignore")
 # define type Array_like
 Array_like = Union[List, pd.DataFrame, pd.Series, np.ndarray, Any]
 
@@ -82,6 +84,11 @@ class Classifiers(CoreVulpes):
         Examples:
 
         """
+        # Convert X to dataframe
+        # (some preprocessing task, model, etc require this format)
+        if not(isinstance(X, pd.DataFrame)):
+            X = pd.DataFrame(X)
+
         # dictionary to store calculated values, model info, etc for each model
         metrics_dic = defaultdict(list)
 
@@ -168,7 +175,7 @@ class Classifiers(CoreVulpes):
                         fit_params=fit_params,
                         scoring=self.custom_scorer)
                 except Exception as e:
-                    print(e)
+                    raise RuntimeError(str(e))
 
                 # store fitted models
                 self.fitted_models_[name] = cv_model["estimator"]
