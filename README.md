@@ -24,14 +24,6 @@ import vulpes
 
 See examples below.
 
-## Why Vulpes?
-
-Vulpes stands for: **V**ector (**U**n)supervised **L**earning **P**rogram **E**stimation **S**ystem.
-
-Nah, I'm kidding, I just love foxes, they are cute! The most common and widespread species of fox is the red fox (Vulpes vulpes).
-
-![alt text](https://github.com/AdrienC21/vulpes/blob/master/fox.jpg?raw=true)
-
 ## Examples
 
 Test:
@@ -39,6 +31,18 @@ Test:
 ```python
 test
 ```
+
+## Documentation
+
+Link to the documentation
+
+## Why Vulpes?
+
+Vulpes stands for: **V**ector (**U**n)supervised **L**earning **P**rogram **E**stimation **S**ystem.
+
+Nah, I'm kidding, I just love foxes, they are cute! The most common and widespread species of fox is the red fox (Vulpes vulpes).
+
+![alt text](https://github.com/AdrienC21/vulpes/blob/main/fox.jpg?raw=true)
 
 ## Testing
 
