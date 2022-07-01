@@ -36,6 +36,12 @@ test
 
 Link to the documentation
 
+## Testing
+
+```python
+pytest vulpes/tests/
+```
+
 ## Why Vulpes?
 
 Vulpes stands for: **V**ector (**U**n)supervised **L**earning **P**rogram **E**stimation **S**ystem.
@@ -43,12 +49,6 @@ Vulpes stands for: **V**ector (**U**n)supervised **L**earning **P**rogram **E**s
 Nah, I'm kidding, I just love foxes, they are cute! The most common and widespread species of fox is the red fox (Vulpes vulpes).
 
 ![alt text](https://github.com/AdrienC21/vulpes/blob/main/fox.jpg?raw=true)
-
-## Testing
-
-```python
-pytest vulpes/tests/
-```
 
 ## Acknowledgment
 
