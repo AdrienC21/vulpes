@@ -8,8 +8,12 @@ to test many classification models
 """
 
 from .corevulpes import CoreVulpes
-from ..utils.utils import CUSTOM_SCORER_CLF, METRIC_NAMES, \
-    METRICS_TO_REVERSE, create_model_2
+from ..utils.utils import (
+    CUSTOM_SCORER_CLF,
+    METRIC_NAMES,
+    METRICS_TO_REVERSE,
+    create_model_2,
+)
 
 import warnings
 import numbers
@@ -23,28 +27,36 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from sklearn.pipeline import Pipeline
-from sklearn.model_selection import cross_validate, RepeatedKFold, \
-    _validation, train_test_split
+from sklearn.model_selection import (
+    cross_validate,
+    RepeatedKFold,
+    _validation,
+    train_test_split,
+)
 
-warnings.filterwarnings("ignore")
 # define type Array_like
 Array_like = Union[List, pd.DataFrame, pd.Series, np.ndarray, Any]
 
 
 class Classifiers(CoreVulpes):
-    def __init__(self, *,
-                 models_to_try: Union[str, List[Tuple[str, Any]]] = "all",
-                 custom_scorer: Dict[str, Any] = CUSTOM_SCORER_CLF,
-                 preprocessing: Union[Pipeline, str] = None,
-                 use_cross_validation: bool = True,
-                 cv: Any = "default",
-                 test_size: float = 0.2,
-                 shuffle: bool = False,
-                 sort_result_by: str = "Balanced Accuracy",
-                 ascending: bool = False,
-                 save_results: bool = False,
-                 path_results: str = "",
-                 random_state: int = 42):
+    def __init__(
+        self,
+        *,
+        models_to_try: Union[str, List[Tuple[str, Any]]] = "all",
+        custom_scorer: Dict[str, Any] = CUSTOM_SCORER_CLF,
+        preprocessing: Union[Pipeline, str] = "default",
+        use_cross_validation: bool = True,
+        cv: Any = "default",
+        test_size: float = 0.2,
+        shuffle: bool = False,
+        sort_result_by: str = "Balanced Accuracy",
+        ascending: bool = False,
+        save_results: bool = False,
+        path_results: str = "",
+        additional_model_params: Dict[str, Any] = {},
+        random_state: int = 42,
+        verbose: int = 0,
+    ):
         super().__init__()
         self.task = "classification"
         self.models_to_try = self.predefined_list_models(models_to_try)
@@ -58,12 +70,23 @@ class Classifiers(CoreVulpes):
         self.ascending = ascending
         self.save_results = save_results
         self.path_results = path_results
+        self.additional_model_params = additional_model_params
         self.random_state = random_state
+        self.verbose = verbose
 
-    def fit(self, X: Array_like, y: Array_like, *,
-            sample_weight: Array_like = None,
-            groups: Array_like = None) -> pd.DataFrame:
-        """Fit many models
+        if not (self.verbose):
+            warnings.filterwarnings("ignore")
+
+    def fit(
+        self,
+        X: Array_like,
+        y: Array_like,
+        *,
+        sample_weight: Array_like = None,
+        groups: Array_like = None,
+    ) -> pd.DataFrame:
+        """
+        Fit many models
 
         Args:
             X (Array_like): Input dataset
@@ -86,7 +109,7 @@ class Classifiers(CoreVulpes):
         """
         # Convert X to dataframe
         # (some preprocessing task, model, etc require this format)
-        if not(isinstance(X, pd.DataFrame)):
+        if not (isinstance(X, pd.DataFrame)):
             X = pd.DataFrame(X)
 
         # dictionary to store calculated values, model info, etc for each model
@@ -99,7 +122,7 @@ class Classifiers(CoreVulpes):
 
             # extend the class with a custom predict proba function
             # based on a decision function or pairwise distances
-            if not(hasattr(model, "predict_proba")):
+            if not (hasattr(model, "predict_proba")):
                 model = create_model_2(model)
             else:
                 model = model()
@@ -118,14 +141,22 @@ class Classifiers(CoreVulpes):
             for pipe_name, pipe_elt in pipe.steps:
                 pipe_elt_available_params = pipe_elt.get_params().keys()
                 if "random_state" in pipe_elt_available_params:
-                    model_params[f"{pipe_name}"
-                                 "__random_state"] = self.random_state
+                    rd_state = f"{pipe_name}__random_state"
+                    model_params[rd_state] = self.random_state
                 if "normalize" in pipe_elt_available_params:
                     model_params[f"{pipe_name}__normalize"] = False
                 if "n_jobs" in pipe_elt_available_params:
                     model_params[f"{pipe_name}__n_jobs"] = -1
                 if "probability" in pipe_elt_available_params:
                     model_params[f"{pipe_name}__probability"] = True
+                for (
+                    add_param_name,
+                    add_param_val,
+                ) in self.additional_model_params.items():
+                    if add_param_name in pipe_elt_available_params:
+                        model_params[
+                            f"{pipe_name}" f"__{add_param_name}"
+                        ] = add_param_val
             # change the loss to allow multiclass and predict proba
             if name == "SGDClassifier":
                 model_params[f"{model_name}__loss"] = "log"
@@ -136,15 +167,18 @@ class Classifiers(CoreVulpes):
             # fit parameters
             fit_params = {}
             for pipe_name, pipe_elt in pipe.steps:
-                if (hasattr(pipe_elt, "fit") and
-                   ("sample_weight" in pipe_elt.fit.__code__.co_varnames)):
+                if hasattr(pipe_elt, "fit") and (
+                    "sample_weight" in pipe_elt.fit.__code__.co_varnames
+                ):
                     fit_params[f"{pipe_name}__sample_weight"] = sample_weight
 
             if self.use_cross_validation:
-                if not(hasattr(self.cv, "split") or
-                       isinstance(self.cv, numbers.Integral) or
-                       isinstance(self.cv, Iterable) or
-                       isinstance(self.cv, str)):
+                if not (
+                    hasattr(self.cv, "split")
+                    or isinstance(self.cv, numbers.Integral)
+                    or isinstance(self.cv, Iterable)
+                    or isinstance(self.cv, str)
+                ):
                     raise ValueError(
                         "Expected cv as an integer, cross-validation "
                         "object (from sklearn.model_selection), "
@@ -156,24 +190,37 @@ class Classifiers(CoreVulpes):
                     cv = self.cv
                 try:
                     cv_model = cross_validate(
-                        pipe, X, y, cv=cv,
-                        return_estimator=True, n_jobs=-1,
+                        pipe,
+                        X,
+                        y,
+                        cv=cv,
+                        return_estimator=True,
+                        n_jobs=-1,
                         fit_params=fit_params,
-                        scoring=self.custom_scorer)
+                        scoring=self.custom_scorer,
+                    )
                 except ValueError as e:
                     print(e)
                     print("Cross validation failed. If groups provided, ")
-                    print("maybe can't stratify because some groups "
-                          "represented in the dataset don't contains enough"
-                          " samples.")
+                    print(
+                        "maybe can't stratify because some groups "
+                        "represented in the dataset don't contains enough"
+                        " samples."
+                    )
                     print("Using RepeatedKFold instead.")
-                    cv = RepeatedKFold(n_splits=5, n_repeats=5,
-                                       random_state=self.random_state)
+                    cv = RepeatedKFold(
+                        n_splits=5, n_repeats=5, random_state=self.random_state
+                    )
                     cv_model = cross_validate(
-                        pipe, X, y, cv=cv,
-                        return_estimator=True, n_jobs=-1,
+                        pipe,
+                        X,
+                        y,
+                        cv=cv,
+                        return_estimator=True,
+                        n_jobs=-1,
                         fit_params=fit_params,
-                        scoring=self.custom_scorer)
+                        scoring=self.custom_scorer,
+                    )
                 except Exception as e:
                     raise RuntimeError(str(e))
 
@@ -188,22 +235,29 @@ class Classifiers(CoreVulpes):
                 for metric_name in self.custom_scorer.keys():
                     print_metric_name = METRIC_NAMES.get(metric_name,
                                                          metric_name)
-                    (metrics_dic[print_metric_name]
-                     .append(np.nanmean(cv_model[f"test_{metric_name}"])))
+                    (
+                        metrics_dic[print_metric_name].append(
+                            np.nanmean(cv_model[f"test_{metric_name}"])
+                        )
+                    )
                 metrics_dic["Model"].append(name)  # add name
                 # add running time
                 metrics_dic["Running time"].append(perf_counter() - top)
             else:
                 try:
-                    X_train, X_test, y_train, \
-                        y_test = train_test_split(
-                            X, y, test_size=self.test_size,
-                            shuffle=self.shuffle,
-                            stratify=groups, random_state=self.random_state)
+                    X_train, X_test, y_train, y_test = train_test_split(
+                        X,
+                        y,
+                        test_size=self.test_size,
+                        shuffle=self.shuffle,
+                        stratify=groups,
+                        random_state=self.random_state,
+                    )
                     pipe.fit(X_train, y_train, **fit_params)
-                    res = _validation._score(pipe, X_test, y_test,
-                                             self.custom_scorer,
-                                             error_score="raise")
+                    res = _validation._score(
+                        pipe, X_test, y_test, self.custom_scorer,
+                        error_score="raise"
+                    )
                 except Exception as e:
                     raise RuntimeError(f"Error when fitting: {e}")
 
@@ -218,8 +272,11 @@ class Classifiers(CoreVulpes):
                 for metric_name in self.custom_scorer.keys():
                     print_metric_name = METRIC_NAMES.get(metric_name,
                                                          metric_name)
-                    (metrics_dic[print_metric_name]
-                     .append(np.nanmean(res[metric_name])))
+                    (
+                        metrics_dic[print_metric_name].append(
+                            np.nanmean(res[metric_name])
+                        )
+                    )
                 metrics_dic["Model"].append(name)  # add name
                 # add running time
                 metrics_dic["Running time"].append(perf_counter() - top)
@@ -228,17 +285,18 @@ class Classifiers(CoreVulpes):
         # ex: rmse, mae, mape
         for metric_name in METRICS_TO_REVERSE:
             if metric_name in metrics_dic:
-                metrics_dic[metric_name] = [-x for x in
-                                            metrics_dic[metric_name]]
+                reverse_metric = [-x for x in metrics_dic[metric_name]]
+                metrics_dic[metric_name] = reverse_metric
         # create a dataframe with the results
         df_models = pd.DataFrame.from_dict(metrics_dic)
-        df_models = (df_models
-                     .sort_values(by=self.sort_result_by,
-                                  ascending=self.ascending)
-                     .set_index("Model"))
+        df_models = df_models.sort_values(
+            by=self.sort_result_by, ascending=self.ascending
+        ).set_index("Model")
         self.df_models = df_models
 
         if self.save_results:  # save results
-            df_models.to_csv(opj.path.join(self.path_results,
-                                           f"vulpes_results_{self.task}.csv"))
+            df_models.to_csv(
+                opj.path.join(self.path_results,
+                              f"vulpes_results_{self.task}.csv")
+            )
         return df_models

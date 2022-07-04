@@ -21,24 +21,28 @@ import pandas as pd
 from tqdm import tqdm
 from sklearn.pipeline import Pipeline
 
-warnings.filterwarnings("ignore")
 # define type Array_like
 Array_like = Union[List, pd.DataFrame, pd.Series, np.ndarray, Any]
 
 
 class Clustering(CoreVulpes):
-    def __init__(self, *,
-                 models_to_try: Union[str, List[Tuple[str, Any]]] = "all",
-                 custom_scorer: Dict[str, Any] = CUSTOM_SCORER_CLT,
-                 preprocessing: Union[Pipeline, str] = None,
-                 nb_clusters: int = 3,
-                 min_samples: int = 5,
-                 eps: int = 0.5,
-                 sort_result_by: str = "Davies–Bouldin Index",
-                 ascending: bool = True,
-                 save_results: bool = False,
-                 path_results: str = "",
-                 random_state: int = None):
+    def __init__(
+        self,
+        *,
+        models_to_try: Union[str, List[Tuple[str, Any]]] = "all",
+        custom_scorer: Dict[str, Any] = CUSTOM_SCORER_CLT,
+        preprocessing: Union[Pipeline, str] = "default",
+        nb_clusters: int = 3,
+        min_samples: int = 5,
+        eps: int = 0.5,
+        sort_result_by: str = "Davies–Bouldin Index",
+        ascending: bool = True,
+        save_results: bool = False,
+        path_results: str = "",
+        additional_model_params: Dict[str, Any] = {},
+        random_state: int = None,
+        verbose: int = 0,
+    ):
         super().__init__()
         self.task = "clustering"
         self.models_to_try = self.predefined_list_models(models_to_try)
@@ -51,11 +55,21 @@ class Clustering(CoreVulpes):
         self.ascending = ascending
         self.save_results = save_results
         self.path_results = path_results
+        self.additional_model_params = additional_model_params
         self.random_state = random_state
+        self.verbose = verbose
 
-    def fit(self, X: Array_like, *,
-            sample_weight: Array_like = None) -> pd.DataFrame:
-        """Fit many clustering algorithms
+        if not (self.verbose):
+            warnings.filterwarnings("ignore")
+
+    def fit(
+        self,
+        X: Array_like,
+        *,
+        sample_weight: Array_like = None
+    ) -> pd.DataFrame:
+        """
+        Fit many clustering algorithms
 
         Args:
             X (Array_like): Input dataset
@@ -74,7 +88,7 @@ class Clustering(CoreVulpes):
         """
         # Convert X to dataframe
         # (some preprocessing task, model, etc require this format)
-        if not(isinstance(X, pd.DataFrame)):
+        if not (isinstance(X, pd.DataFrame)):
             X = pd.DataFrame(X)
 
         # dictionary to store calculated values, model info, etc for each model
@@ -100,20 +114,28 @@ class Clustering(CoreVulpes):
             for pipe_name, pipe_elt in pipe.steps:
                 pipe_elt_available_params = pipe_elt.get_params().keys()
                 if "random_state" in pipe_elt_available_params:
-                    model_params[f"{pipe_name}"
-                                 "__random_state"] = self.random_state
+                    rd_state = f"{pipe_name}__random_state"
+                    model_params[rd_state] = self.random_state
                 if "normalize" in pipe_elt_available_params:
                     model_params[f"{pipe_name}__normalize"] = False
                 if "n_jobs" in pipe_elt_available_params:
                     model_params[f"{pipe_name}__n_jobs"] = -1
                 if "nb_clusters" in pipe_elt_available_params:
-                    model_params[f"{pipe_name}__"
-                                 "nb_clusters"] = self.nb_clusters
+                    nb_clt = f"{pipe_name}__nb_clusters"
+                    model_params[nb_clt] = self.nb_clusters
                 if "min_samples" in pipe_elt_available_params:
-                    model_params[f"{pipe_name}__"
-                                 "min_samples"] = self.min_samples
+                    nb_spl = f"{pipe_name}__min_samples"
+                    model_params[nb_spl] = self.min_samples
                 if "eps" in pipe_elt_available_params:
                     model_params[f"{pipe_name}__eps"] = self.eps
+                for (
+                    add_param_name,
+                    add_param_val,
+                ) in self.additional_model_params.items():
+                    if add_param_name in pipe_elt_available_params:
+                        model_params[
+                            f"{pipe_name}" f"__{add_param_name}"
+                        ] = add_param_val
             if model_params != {}:
                 pipe.set_params(**model_params)
 
@@ -121,8 +143,9 @@ class Clustering(CoreVulpes):
             # fit parameters
             fit_params = {}
             for pipe_name, pipe_elt in pipe.steps:
-                if (hasattr(pipe_elt, "fit") and
-                   ("sample_weight" in pipe_elt.fit.__code__.co_varnames)):
+                if hasattr(pipe_elt, "fit") and (
+                    "sample_weight" in pipe_elt.fit.__code__.co_varnames
+                ):
                     fit_params[f"{pipe_name}__sample_weight"] = sample_weight
 
             try:
@@ -149,10 +172,9 @@ class Clustering(CoreVulpes):
             # a label can be missing
             # in a particular fold, thus creating nan values
             for metric_name in self.custom_scorer.keys():
-                print_metric_name = METRIC_NAMES.get(metric_name,
-                                                     metric_name)
-                (metrics_dic[print_metric_name]
-                 .append(np.nanmean(res[metric_name])))
+                # print_metric_name (pmn)
+                pmn = METRIC_NAMES.get(metric_name, metric_name)
+                (metrics_dic[pmn].append(np.nanmean(res[metric_name])))
             metrics_dic["Model"].append(name)  # add name
             # add running time
             metrics_dic["Running time"].append(perf_counter() - top)
@@ -161,16 +183,17 @@ class Clustering(CoreVulpes):
         # ex: rmse, mae, mape
         for metric_name in METRICS_TO_REVERSE:
             if metric_name in metrics_dic:
-                metrics_dic[metric_name] = [-x for x in
-                                            metrics_dic[metric_name]]
+                reverse_metric = [-x for x in metrics_dic[metric_name]]
+                metrics_dic[metric_name] = reverse_metric
         df_models = pd.DataFrame.from_dict(metrics_dic)
-        df_models = (df_models
-                     .sort_values(by=self.sort_result_by,
-                                  ascending=self.ascending)
-                     .set_index("Model"))
+        df_models = df_models.sort_values(
+            by=self.sort_result_by, ascending=self.ascending
+        ).set_index("Model")
         self.df_models = df_models
 
         if self.save_results:  # save results
-            df_models.to_csv(opj.path.join(self.path_results,
-                                           f"vulpes_results_{self.task}.csv"))
+            df_models.to_csv(
+                opj.path.join(self.path_results,
+                              f"vulpes_results_{self.task}.csv")
+            )
         return df_models

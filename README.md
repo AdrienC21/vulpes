@@ -2,13 +2,20 @@
 
 **Vulpes: Test many classification, regression models and clustering algorithms to see which one is most suitable for your dataset.**
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![pypi version](https://img.shields.io/pypi/v/vulpes.svg)](https://pypi.python.org/pypi/vulpes)
+[![Documentation Status](https://readthedocs.org/projects/vulpes/badge/?version=latest)](https://vulpes.readthedocs.io/en/latest/?badge=latest)
+[![Downloads](https://static.pepy.tech/badge/vulpes)](https://pepy.tech/project/vulpes)
+
+![alt text](https://github.com/AdrienC21/vulpes/blob/main/logo_large.png?raw=true | width=1200)
+
 Vulpes 🦊 is a Python package that allows you to test many models, whether you want to do classification, regression or clustering in your projects. It calculates many metrics for each model to compare them. It is highly customizable and it contains many features to save time building robust ML models.
 
 If you like this project, please leave a star ⭐ on GitHub !
 
 Alpha version.
 
-Author: Adrien Carrel.
+Author & Maintainer: Adrien Carrel.
 
 ## Installation
 
@@ -54,7 +61,7 @@ Nah, I'm kidding, I just love foxes, they are cute! The most common and widespre
 
 ## Acknowledgment
 
-- Lazy Predict by Shankar Rao Pandala (and some contributors) for the inspiration. Even though it is older and it offers less functionnalities, it is the first package to my knowledge that, in the same way, allows to test many models.
+- Shankar Rao Pandala (and some contributors). Their package (Lazy Predict) has been an inspiration.
 
 ## License
 
