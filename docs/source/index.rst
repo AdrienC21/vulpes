@@ -15,8 +15,8 @@ Welcome to vulpes's documentation!
    regressions
    clustering
    authors
-   changelog
    vulpes
+   changelog
 
 Indices and tables
 ==================

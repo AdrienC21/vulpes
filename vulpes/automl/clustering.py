@@ -66,6 +66,25 @@ class Clustering(CoreVulpes):
             to every model and elements of the pipeline. Defaults to 42.
         verbose (int, optional): if greater than 1, print the warnings.
             Defaults to 0.
+
+    Examples:
+
+        >>> from sklearn.datasets import load_iris
+        >>> from vulpes.automl import Clustering
+
+        >>> dataset = load_iris()
+        >>> X = pd.DataFrame(dataset["data"], columns=dataset["feature_names"])
+
+        >>> clustering = Clustering()
+        >>> df_models = clustering.fit(X)
+        >>> df_models
+        | Model                   | Calinski-Harabasz Index | ...
+        |-------------------------|-------------------------|----------
+        | AgglomerativeClustering | 502.821564		        | ...
+        | MeanShift	              | 509.703427		        | ...
+        | Birch                   | 458.472511	            | ...
+        | SpectralClustering	  | 410.369441	            | ...
+        | ...                     | ...                     | ...
     """
     def __init__(
         self,

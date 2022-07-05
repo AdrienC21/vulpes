@@ -74,7 +74,19 @@ class CoreVulpes(ABC):
             data in X
 
         Examples:
-
+            >>> import pandas as pd
+            >>> import numpy as np
+            >>> df = pd.DataFrame([["a", "x"],
+                                   [np.nan, "y"],
+                                   ["a", np.nan],
+                                   ["b", np.nan]],
+                                  dtype="category",
+                                  columns=["feature1", "feature2"])
+            >>> classifiers.missing_data(df)
+            | Total Missing | Percentage (%) | Accuracy |
+            |--------------:|---------------:|---------:|
+            |    feature2   |              2 |     50.0 |
+            |    feature1   |              1 |     25.0 |
         """
         if not (isinstance(X, pd.DataFrame)):
             X = pd.DataFrame(X)  # locally modify X

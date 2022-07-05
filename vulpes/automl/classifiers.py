@@ -91,6 +91,27 @@ class Classifiers(CoreVulpes):
             to every model and elements of the pipeline. Defaults to 42.
         verbose (int, optional): if greater than 1, print the warnings.
             Defaults to 0.
+    Examples:
+
+        >>> import pandas as pd
+        >>> from sklearn.datasets import load_iris
+        >>> from vulpes.automl import Classifiers
+
+        >>> dataset = load_iris()
+        >>> X = pd.DataFrame(dataset["data"], columns=dataset["feature_names"])
+        >>> y = dataset["target"]
+
+        >>> classifiers = Classifiers()
+        >>> df_models = classifiers.fit(X, y)
+        >>> df_models
+        | Model                       | Balanced Accuracy | Accuracy | ...
+        |-----------------------------|-------------------|----------|------
+        Model									
+        LinearDiscriminantAnalysis	    0.977625	        0.977333   ...
+        MLPClassifier	                0.973753	        0.973333   ...
+        QuadraticDiscriminantAnalysis	0.973219	        0.973333   ...
+        KNeighborsClassifier	        0.971702	        0.969333   ...
+        ...                             ...                 ...        ...
     """
     def __init__(
         self,

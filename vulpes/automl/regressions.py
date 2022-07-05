@@ -92,6 +92,27 @@ class Regressions(CoreVulpes):
             to every model and elements of the pipeline. Defaults to 42.
         verbose (int, optional): if greater than 1, print the warnings.
             Defaults to 0.
+
+    Examples:
+
+        >>> import pandas as pd
+        >>> from sklearn.datasets import make_regression
+        >>> from vulpes.automl import Regressions
+
+        >>> X, y = make_regression(
+                n_samples=20, n_features=1, random_state=0, noise=4.0,
+                bias=100.0)
+
+        >>> regressions = Regressions()
+        >>> df_models = regressions.fit(X, y)
+        >>> df_models
+        | Model                       |    R2    |   RMSE    | ...
+        |-----------------------------|----------|-----------|------
+        | LassoCV                     | 0.997649 | 19.818497 | ...
+        | HuberRegressor	          | 0.997776 | 19.881912 | ...
+        | Lars	                      | 0.997694 | 19.555598 | ...
+        | TransformedTargetRegressor  | 0.997748 | 19.298391 | ...
+        | ...                         | ...      | ...       | ...
     """
     def __init__(
         self,
