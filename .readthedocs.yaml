@@ -27,7 +27,9 @@ sphinx:
 python:
   version: "3.7"
   install:
-  - method: pip
   - requirements: requirements.txt
+  - method: pip
+    path: .
     extra_requirements:
       - m2r2
+  system_packages: true
