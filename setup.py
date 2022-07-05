@@ -11,10 +11,13 @@ LONG_DESCRIPTION = ""
 with open("README.md", "r+", encoding="UTF-8") as f:
     LONG_DESCRIPTION += f.read()
 LONG_DESCRIPTION += "\n\n"
-with open("CHANGELOG.txt", "r+") as f:
+with open("CHANGELOG.rst", "r+") as f:
     LONG_DESCRIPTION += f.read()
+# Install Requires
+with open("requirements.txt", "r+") as f:
+    INSTALL_REQUIRES = [x.replace("\n", "") for x in f.readlines()]
 
-URL = "https://github.com/AdrienC21/vulpes"
+URL = "https://vulpes.readthedocs.io/en/latest/"
 DOWNLOAD_URL = "https://pypi.org/project/vulpes/"
 PROJECT_URLS = {
     "Bug Tracker": "https://github.com/AdrienC21/vulpes/issues",
@@ -42,10 +45,11 @@ CLASSIFIERS = [
     'Topic :: Software Development :: Libraries',
     'Topic :: Software Development :: Libraries :: Python Modules'
 ]
-KEYWORDS = ["vulpes", "python", "machine", "learning", "model",
-            "scikit", "learn", "artificial", "intelligence",
+KEYWORDS = ["vulpes", "python", "automl", "scikit-learn",
+            "machine-learning", "machine", "learning", "model",
+            "artificial", "intelligence", "clustering",
             "dataset", "classification", "regression",
-            "hyperparameter", "tuning"]
+            "hyperparameter-tuning"]
 
 setup(
     name="vulpes",
@@ -65,5 +69,5 @@ setup(
     keywords=KEYWORDS,
     packages=find_packages(),
     python_requires=PYTHON_REQUIRES,
-    install_requires=[""]
+    install_requires=INSTALL_REQUIRES
 )

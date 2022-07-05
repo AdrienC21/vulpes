@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""test_clustering.py: Test the clustering module
+"""
+
 from vulpes.automl import Clustering
 
 import numpy as np
@@ -5,8 +11,14 @@ import numpy as np
 
 def test_clustering_1() -> None:
     # clustering
-    X = np.array([[np.random.randint(-20, 20) * np.random.random(),
-                   np.random.randint(-10, 10) * np.random.random()]
-                 for _ in range(50)])
+    X = np.array(
+        [
+            [
+                np.random.randint(-20, 20) * np.random.random(),
+                np.random.randint(-10, 10) * np.random.random(),
+            ]
+            for _ in range(50)
+        ]
+    )
     clustering = Clustering()
     _ = clustering.fit(X)

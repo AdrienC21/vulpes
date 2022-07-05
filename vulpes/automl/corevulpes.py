@@ -3,8 +3,6 @@
 
 """corevulpes.py: Parent class that contains
 common methods shared between children classes
-
-@Author: Adrien Carrel
 """
 
 from ..utils.utils import (
@@ -51,7 +49,7 @@ Array_like = Union[List, pd.DataFrame, pd.Series, np.ndarray, Any]
 
 class CoreVulpes(ABC):
     """
-    Parent class with shared methods for the classes
+    Parent class with shared methods between the classes
     Classifiers, Regressions and Clustering
     """
 

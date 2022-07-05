@@ -3,8 +3,6 @@
 
 """clustering.py: Class Clustering
 to test many clustering algorithms
-
-@Author: Adrien Carrel
 """
 
 from .corevulpes import CoreVulpes
@@ -26,20 +24,62 @@ Array_like = Union[List, pd.DataFrame, pd.Series, np.ndarray, Any]
 
 
 class Clustering(CoreVulpes):
+    """
+    Object to train many regressions.
+    All the parameters are optionals and can be modified.
+
+    Args:
+        models_to_try (Union[str, List[Tuple[str, Any]]], optional):
+            List of models to try. It can be either a string that corresponds
+            to a predefined list of models ("all", ...) or it can be a list
+            of tuple (name of a model, class of a model)
+            (e.g. ("KMeans",
+                   sklearn.cluster.KMeans)).
+            Defaults to "all" (train all the available clustering
+            algorithms).
+        custom_scorer (Dict[str, Any], optional): metrics to calculate after
+            fitting a model. Dictionary with pairs name:scorer where the
+            scorer is created using the function make_scorer from sklearn.
+            Defaults to CUSTOM_SCORER_CLT.
+        preprocessing (Union[Pipeline, str], optional): preprocessing
+            pipeline to use. It can be None (no preprocessing), a
+            predefined preprocessing pipeline ("default", ...) or
+            a Pipeline object from sklearn. Defaults to "default":
+            it applies a OneHotEncoder to "category" and object features,
+            and it applies a SimpleImputer (median strategy) and a
+            StandardScaler to numerical features.
+        sort_result_by (str, optional): on which metric do you want to
+            sort the final dataframe. Defaults to "Davies–Bouldin Index".
+        ascending (bool, optional): sort the final dataframe in
+            ascending order?. Defaults to True.
+        save_results (bool, optional): if True, save the results in a csv
+            file. Defaults to False.
+        path_results (str, optional): path to use when saving the results.
+            Defaults to "".
+        additional_model_params (Dict[str, Any], optional): dictionary
+            that contains parameters to be applied to each element of the
+            pipeline. E.g. {"n_estimators": 100}, apply to all the
+            preprocessing tasks and/or models that have the parameter
+            n_estimators with the parameter n_estimators.
+            Defaults to {"nb_clusters": 3, "min_samples": 5, "eps": 0.5}.
+        random_state (int, optional): random state variable. Is applied
+            to every model and elements of the pipeline. Defaults to 42.
+        verbose (int, optional): if greater than 1, print the warnings.
+            Defaults to 0.
+    """
     def __init__(
         self,
         *,
         models_to_try: Union[str, List[Tuple[str, Any]]] = "all",
         custom_scorer: Dict[str, Any] = CUSTOM_SCORER_CLT,
         preprocessing: Union[Pipeline, str] = "default",
-        nb_clusters: int = 3,
-        min_samples: int = 5,
-        eps: int = 0.5,
         sort_result_by: str = "Davies–Bouldin Index",
         ascending: bool = True,
         save_results: bool = False,
         path_results: str = "",
-        additional_model_params: Dict[str, Any] = {},
+        additional_model_params: Dict[str, Any] = {"nb_clusters": 3,
+                                                   "min_samples": 5,
+                                                   "eps": 0.5},
         random_state: int = None,
         verbose: int = 0,
     ):
@@ -48,9 +88,6 @@ class Clustering(CoreVulpes):
         self.models_to_try = self.predefined_list_models(models_to_try)
         self.custom_scorer = custom_scorer
         self.preprocessing = preprocessing
-        self.nb_clusters = nb_clusters
-        self.min_samples = min_samples
-        self.eps = eps
         self.sort_result_by = sort_result_by
         self.ascending = ascending
         self.save_results = save_results
@@ -107,9 +144,6 @@ class Clustering(CoreVulpes):
             # When available:
             # - maximize n_jobs
             # - fix a random_state
-            # - nb_clusters
-            # - min_sample
-            # - epsilon (eps)
             model_params = {}
             for pipe_name, pipe_elt in pipe.steps:
                 pipe_elt_available_params = pipe_elt.get_params().keys()
@@ -120,21 +154,13 @@ class Clustering(CoreVulpes):
                     model_params[f"{pipe_name}__normalize"] = False
                 if "n_jobs" in pipe_elt_available_params:
                     model_params[f"{pipe_name}__n_jobs"] = -1
-                if "nb_clusters" in pipe_elt_available_params:
-                    nb_clt = f"{pipe_name}__nb_clusters"
-                    model_params[nb_clt] = self.nb_clusters
-                if "min_samples" in pipe_elt_available_params:
-                    nb_spl = f"{pipe_name}__min_samples"
-                    model_params[nb_spl] = self.min_samples
-                if "eps" in pipe_elt_available_params:
-                    model_params[f"{pipe_name}__eps"] = self.eps
                 for (
                     add_param_name,
                     add_param_val,
                 ) in self.additional_model_params.items():
                     if add_param_name in pipe_elt_available_params:
                         model_params[
-                            f"{pipe_name}" f"__{add_param_name}"
+                            f"{pipe_name}__{add_param_name}"
                         ] = add_param_val
             if model_params != {}:
                 pipe.set_params(**model_params)

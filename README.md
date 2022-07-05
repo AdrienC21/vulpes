@@ -1,13 +1,13 @@
 # Vulpes
 
-**Vulpes: Test many classification, regression models and clustering algorithms to see which one is most suitable for your dataset.**
-
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![pypi version](https://img.shields.io/pypi/v/vulpes.svg)](https://pypi.python.org/pypi/vulpes)
 [![Documentation Status](https://readthedocs.org/projects/vulpes/badge/?version=latest)](https://vulpes.readthedocs.io/en/latest/?badge=latest)
 [![Downloads](https://static.pepy.tech/badge/vulpes)](https://pepy.tech/project/vulpes)
 
-![alt text](https://github.com/AdrienC21/vulpes/blob/main/logo_large.png?raw=true | width=1200)
+![](https://github.com/AdrienC21/vulpes/blob/main/logo_large.png?raw=true =700x)
+
+**Vulpes: Test many classification, regression models and clustering algorithms to see which one is most suitable for your dataset.**
 
 Vulpes 🦊 is a Python package that allows you to test many models, whether you want to do classification, regression or clustering in your projects. It calculates many metrics for each model to compare them. It is highly customizable and it contains many features to save time building robust ML models.
 
@@ -25,13 +25,21 @@ Using pip:
 pip install vulpes
 ```
 
-Then, you can use vulpes by importing the package:
+## Dependencies
 
-```python
-import vulpes
-```
+vulpes requires:
 
-See examples below.
+- Python (>= 3.7)
+- numpy (>= 1.22)
+- pandas (>= 1.3.5)
+- scikit-learn (>= 1.0.2)
+- tqdm (>= 4.64.0)
+- xgboost (>= 1.6.1)
+- lightgbm (>= 3.3.2)
+
+## Documentation
+
+Link to the documentation: [https://vulpes.readthedocs.io/en/latest/](https://vulpes.readthedocs.io/en/latest/)
 
 ## Examples
 
@@ -41,11 +49,9 @@ Test:
 test
 ```
 
-## Documentation
-
-Link to the documentation
-
 ## Testing
+
+If you want to submit a pull request or if you want to test in local the package, you can run some tests with the library pytest by running the following command:
 
 ```python
 pytest vulpes/tests/

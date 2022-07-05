@@ -3,8 +3,6 @@
 
 """classifiers.py: Class Classifiers
 to test many classification models
-
-@Author: Adrien Carrel
 """
 
 from .corevulpes import CoreVulpes
@@ -39,6 +37,61 @@ Array_like = Union[List, pd.DataFrame, pd.Series, np.ndarray, Any]
 
 
 class Classifiers(CoreVulpes):
+    """
+    Object to train many classifiers.
+    All the parameters are optionals and can be modified.
+
+    Args:
+        models_to_try (Union[str, List[Tuple[str, Any]]], optional):
+            List of models to try. It can be either a string that corresponds
+            to a predefined list of models ("all", ...) or it can be a list
+            of tuple (name of a model, class of a model)
+            (e.g. ("RandomForestClassifier",
+                   sklearn.ensemble.RandomForestClassifier)).
+            Defaults to "all" (train all the available classification
+            algorithms).
+        custom_scorer (Dict[str, Any], optional): metrics to calculate after
+            fitting a model. Dictionary with pairs name:scorer where the
+            scorer is created using the function make_scorer from sklearn.
+            Defaults to CUSTOM_SCORER_CLF.
+        preprocessing (Union[Pipeline, str], optional): preprocessing
+            pipeline to use. It can be None (no preprocessing), a
+            predefined preprocessing pipeline ("default", ...) or
+            a Pipeline object from sklearn. Defaults to "default":
+            it applies a OneHotEncoder to "category" and object features,
+            and it applies a SimpleImputer (median strategy) and a
+            StandardScaler to numerical features.
+        use_cross_validation (bool, optional): whether or not we apply
+            a cross-validation. Defaults to True.
+        cv (Any, optional): cross-validation object. It can be a predefined
+            cross-validation setting ("default", "timeseries", ...), an
+            iterable object, a cross-validation object from sklearn, etc.
+            Defaults to "default": it applies a StratifiedShuffleSplit
+            if a groups object is given when applying the fit method,
+            otherwise, it uses a RepeatedKFold. In both cases, n_splits
+            is set to 5.
+        test_size (float, optional): test of the size set when splitting.
+            Defaults to 0.2.
+        shuffle (bool, optional): whether or not the algorithm shuffle the
+            sample when splitting the given dataset. Defaults to False.
+        sort_result_by (str, optional): on which metric do you want to
+            sort the final dataframe. Defaults to "Balanced Accuracy".
+        ascending (bool, optional): sort the final dataframe in
+            ascending order?. Defaults to False.
+        save_results (bool, optional): if True, save the results in a csv
+            file. Defaults to False.
+        path_results (str, optional): path to use when saving the results.
+            Defaults to "".
+        additional_model_params (Dict[str, Any], optional): dictionary
+            that contains parameters to be applied to each element of the
+            pipeline. E.g. {"n_estimators": 100}, apply to all the
+            preprocessing tasks and/or models that have the parameter
+            n_estimators with the parameter n_estimators. Defaults to {}.
+        random_state (int, optional): random state variable. Is applied
+            to every model and elements of the pipeline. Defaults to 42.
+        verbose (int, optional): if greater than 1, print the warnings.
+            Defaults to 0.
+    """
     def __init__(
         self,
         *,
@@ -155,7 +208,7 @@ class Classifiers(CoreVulpes):
                 ) in self.additional_model_params.items():
                     if add_param_name in pipe_elt_available_params:
                         model_params[
-                            f"{pipe_name}" f"__{add_param_name}"
+                            f"{pipe_name}__{add_param_name}"
                         ] = add_param_val
             # change the loss to allow multiclass and predict proba
             if name == "SGDClassifier":
