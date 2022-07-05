@@ -5,7 +5,7 @@
 [![Documentation Status](https://readthedocs.org/projects/vulpes/badge/?version=latest)](https://vulpes.readthedocs.io/en/latest/?badge=latest)
 [![Downloads](https://static.pepy.tech/badge/vulpes)](https://pepy.tech/project/vulpes)
 
-![](https://github.com/AdrienC21/vulpes/blob/main/logo_large.png?raw=true =700x)
+<img src=https://github.com/AdrienC21/vulpes/blob/main/logo_large.png?raw=true  width=50% height=50%>
 
 **Vulpes: Test many classification, regression models and clustering algorithms to see which one is most suitable for your dataset.**
 
