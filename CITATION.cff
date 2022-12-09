@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Carrel"
+  given-names: "Adrien"
+  orcid: "https://orcid.org/0000-0002-0051-2247"
+title: "Vulpes: Test many classification, regression models and clustering algorithms to see which one is most suitable for your dataset."
+version: 1.0.0
+date-released: 2022-07-01
+url: "https://github.com/AdrienC21/vulpes"
