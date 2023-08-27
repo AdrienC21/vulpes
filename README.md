@@ -3,6 +3,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![pypi version](https://img.shields.io/pypi/v/vulpes.svg)](https://pypi.python.org/pypi/vulpes)
 [![Documentation Status](https://readthedocs.org/projects/vulpes/badge/?version=latest)](https://vulpes.readthedocs.io/en/latest/?badge=latest)
+[![visitors](https://visitor-badge.laobi.icu/badge?page_id=AdrienC21.vulpes&right_color=%23FFA500)](https://github.com/AdrienC21/vulpes)
 [![Downloads](https://static.pepy.tech/badge/vulpes)](https://pepy.tech/project/vulpes)
 
 <img src="https://github.com/AdrienC21/vulpes/blob/main/logo_large.png?raw=true"  width=60% height=60%>
